@@ -1,2 +1,6 @@
 streamlit
 tavily-python
+pandas
+pypdf2       # Reads PDF text
+pytesseract  # Scans text from images (Google Lens style)
+groq         # The fastest "Own AI" engine (Free tier available)
