@@ -73,20 +73,27 @@ def get_apollo_response(user_input, context=""):
 
 # --- IMAGE GENERATION FUNCTION ---
 def generate_apollo_image(prompt):
-    """Generates an image using Groq's specialized April 2026 model."""
+    """
+    Apollo Imaging Engine (v3.0). 
+    Uses a high-speed stable diffusion bridge for real-time visualization.
+    """
     try:
-        # Note: In 2026, image generation is handled via the images.generate endpoint
-        response = groq_client.images.generate(
-            # Standard April 2026 Groq image model ID
-            model="groq-imagine-aurora-v2", 
-            prompt=prompt,
-            n=1,
-            size="1024x1024"
-        )
-        return response.data[0].url # Returns the temporary URL of the generated image
+        # Since Groq handles Text/Vision, we use a specialized Imaging Bridge
+        # For the demo, this creates a high-quality visualization URL
+        # Format: https://pollinations.ai/p/[prompt] (Best for stable live demos)
+        
+        encoded_prompt = prompt.replace(" ", "%20")
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true"
+        
+        # We ping it to make sure it's ready
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            return image_url
+        else:
+            return "Generation Error: Imaging Bridge Offline"
     except Exception as e:
         return f"Generation Error: {str(e)}"
-
+        
 def encode_image(image_file):
     """Converts camera image to Base64 for Vision analysis."""
     return base64.b64encode(image_file.getvalue()).decode('utf-8')
