@@ -22,70 +22,60 @@ TAVILY_API_KEY = "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"
 groq_client = Groq(api_key=GROQ_API_KEY)
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
-# ==========================================
-# 2. EXECUTIVE UI & CSS
-# ==========================================
-st.set_page_config(page_title="Apollo OS", layout="wide")
 
 # ==========================================
-# 2. EXECUTIVE UI & CSS (FORCE FIX)
-# ==========================================
-st.set_page_config(page_title="Apollo OS", layout="wide")
-
-# ==========================================
-# 2. EXECUTIVE UI & CSS (ICON REPLACEMENT)
+# 2. EXECUTIVE UI & CSS (WING-IT VERSION)
 # ==========================================
 st.set_page_config(page_title="Apollo OS", layout="wide")
 
 st.markdown("""
     <style>
-    /* 1. Base Styles */
+    /* 1. Base UI */
     .stApp { background-color: #020617 !important; }
-    * { font-family: 'JetBrains Mono', monospace !important; }
-    h1, h2, h3, p, span, div, label { color: #f8fafc !important; }
-
-    /* 2. THE NUCLEAR FIX: DELETE TEXT, ADD ICON */
-    /* Kill all existing text labels in the uploader area */
-    [data-testid="stFileUploader"] label, 
-    [data-testid="stFileUploader"] section > div, 
-    [data-testid="stFileUploader"] small { 
-        display: none !important; 
+    h1, h2, h3, p, span, div, label { 
+        color: #f8fafc !important; 
+        font-family: 'JetBrains Mono', monospace !important; 
     }
 
-    /* Target the button text directly and make it invisible */
-    [data-testid="stFileUploader"] button p {
-        font-size: 0px !important;
-        line-height: 0 !important;
-        display: block;
-    }
-
-    /* Inject the PDF/Document Icon into the button */
-    [data-testid="stFileUploader"] button p::before {
-        content: "📄 UPLOAD DATA";
-        font-size: 14px !important;
-        color: #38bdf8 !important;
-        visibility: visible !important;
-        display: block;
-    }
-
-    /* Style the button container */
+    /* 2. THE BLUE BOX UPLOADER (ORIGINAL STYLE) */
+    /* Target the button container */
     button[kind="secondary"] {
-        background-color: #0f172a !important;
+        background-color: #1e293b !important;
+        color: #38bdf8 !important;
         border: 1px solid #38bdf8 !important;
         border-radius: 6px !important;
-        padding: 5px 20px !important;
-        min-height: 45px !important;
+        padding: 0.5rem 1rem !important;
     }
 
-    /* 3. Refined Chat UI */
+    /* The file uploader 'Dropzone' area */
+    [data-testid="stFileUploaderDropzone"] {
+        border: 1px solid #334155 !important;
+        background-color: #0f172a !important;
+        border-radius: 10px !important;
+    }
+
+    /* Hide only the small helper text to reduce clutter */
+    [data-testid="stFileUploader"] small {
+        display: none !important;
+    }
+
+    /* 3. Professional Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
         border-radius: 10px !important;
         margin-bottom: 15px !important;
     }
-    [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { display: none !important; }
-    [data-testid="stFileUploaderFileName"] { color: #38bdf8 !important; margin-top: 10px !important; }
+    
+    /* Remove Icons for the 'Clean OS' look */
+    [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { 
+        display: none !important; 
+    }
+    
+    /* File Name text color */
+    [data-testid="stFileUploaderFileName"] { 
+        color: #38bdf8 !important; 
+    }
     </style>
     """, unsafe_allow_html=True)
 # ==========================================
