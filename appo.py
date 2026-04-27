@@ -27,21 +27,53 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 # ==========================================
 st.set_page_config(page_title="Apollo OS", layout="wide")
 
+# ==========================================
+# 2. EXECUTIVE UI & CSS (FORCE FIX)
+# ==========================================
+st.set_page_config(page_title="Apollo OS", layout="wide")
+
 st.markdown("""
     <style>
+    /* 1. Force Background & Global Font */
     .stApp { background-color: #020617 !important; }
-    h1, h2, h3, p, span, div, label, li { color: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; }
-    
-    /* FIX: Hides the ghost 'Upload' label causing the overlap */
-    [data-testid="stFileUploader"] section > label { display: none !important; }
-    
-    button[kind="secondary"] { background-color: #1e293b !important; color: #38bdf8 !important; border: 1px solid #38bdf8 !important; border-radius: 8px !important; }
-    [data-testid="stFileUploader"] small, [data-testid="stFileUploaderFileName"] { color: #94a3b8 !important; }
-    .stChatMessage { background-color: #0f172a !important; border-left: 4px solid #38bdf8 !important; border-radius: 10px !important; margin-bottom: 15px !important; }
+    * { font-family: 'JetBrains Mono', monospace !important; }
+    h1, h2, h3, p, span, div, label { color: #f8fafc !important; }
+
+    /* 2. THE UPLOAD FONT BRUTE-FORCE FIX */
+    /* Hides the 'ghost' labels causing the double-text overlap */
+    [data-testid="stFileUploader"] > section > label, 
+    [data-testid="stFileUploader"] label div { 
+        display: none !important; 
+        visibility: hidden !important;
+        height: 0px !important;
+    }
+
+    /* Style the actual visible button text */
+    [data-testid="stFileUploader"] button p {
+        color: #38bdf8 !important;
+        font-weight: bold !important;
+    }
+
+    /* Style the Browse Files button container */
+    button[kind="secondary"] {
+        background-color: #1e293b !important;
+        border: 1px solid #38bdf8 !important;
+        border-radius: 8px !important;
+    }
+
+    /* 3. Chat & UI Refinement */
+    .stChatMessage { 
+        background-color: #0f172a !important;
+        border-left: 4px solid #38bdf8 !important;
+        border-radius: 10px !important;
+        margin-bottom: 15px !important;
+    }
     [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { display: none !important; }
+    
+    /* File Name text fix */
+    [data-testid="stFileUploaderFileName"] { color: #38bdf8 !important; }
     </style>
     """, unsafe_allow_html=True)
-
 # ==========================================
 # 3. LOGIC CORE
 # ==========================================
