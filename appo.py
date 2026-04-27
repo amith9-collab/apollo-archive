@@ -4,10 +4,13 @@ from tavily import TavilyClient
 import PyPDF2
 import base64
 import time
+import requests # Needed to download the generated image
+from io import BytesIO # Needed to handle image data
 
 # ==========================================
 # 1. CORE AI ENGINES & API KEYS
 # ==========================================
+# Use secrets management for security before deploying!
 GROQ_API_KEY = "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"
 TAVILY_API_KEY = "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"
 
@@ -15,7 +18,7 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
 # ==========================================
-# 2. EXECUTIVE UI & CSS (STABLE VERSION)
+# 2. EXECUTIVE UI & CSS
 # ==========================================
 st.set_page_config(page_title="Apollo OS", layout="wide", page_icon="💠")
 
@@ -26,30 +29,23 @@ st.markdown("""
         color: #f8fafc !important; 
         font-family: 'JetBrains Mono', monospace !important; 
     }
-
-    /* Professional Button Styling */
     button[kind="secondary"] {
         background-color: #1e293b !important;
         color: #38bdf8 !important;
         border: 1px solid #38bdf8 !important;
         border-radius: 6px !important;
     }
-
-    /* Uploader Dropzone Fix */
     [data-testid="stFileUploaderDropzone"] {
         border: 1px solid #334155 !important;
         background-color: #0f172a !important;
         border-radius: 10px !important;
     }
-
-    /* Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
         border-radius: 10px !important;
         margin-bottom: 15px !important;
     }
-    
     [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { 
         display: none !important; 
     }
@@ -75,16 +71,33 @@ def get_apollo_response(user_input, context=""):
     except Exception as e:
         return f"Neural link timeout. Error: {str(e)}"
 
+# --- IMAGE GENERATION FUNCTION ---
+def generate_apollo_image(prompt):
+    """Generates an image using Groq's specialized April 2026 model."""
+    try:
+        # Note: In 2026, image generation is handled via the images.generate endpoint
+        response = groq_client.images.generate(
+            # Standard April 2026 Groq image model ID
+            model="groq-imagine-aurora-v2", 
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
+        )
+        return response.data[0].url # Returns the temporary URL of the generated image
+    except Exception as e:
+        return f"Generation Error: {str(e)}"
+
 def encode_image(image_file):
-    """Converts camera image to Base64 for the AI to 'see'."""
+    """Converts camera image to Base64 for Vision analysis."""
     return base64.b64encode(image_file.getvalue()).decode('utf-8')
 
 def ask_apollo_vision(image_file, user_query):
-    """Visual reasoning using Llama 3.2 Vision."""
+    """Visual reasoning using Llama 4 Scout (April 2026 standard)."""
     base64_image = encode_image(image_file)
     try:
         response = groq_client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            # Updated to Llama 4 Scout based on previous 404/400 errors
+            model="meta-llama/llama-4-scout-17b-16e-instruct", 
             messages=[
                 {
                     "role": "user",
@@ -115,7 +128,7 @@ def read_pdf(file):
 with st.sidebar:
     st.title("💠 APOLLO OS")
     st.write("Status: **System Active**")
-    module = st.radio("Access Module:", ["Research Hub", "PDF Intelligence", "Vision Lens", "News Feed"])
+    module = st.radio("Access Module:", ["Research Hub", "PDF Intelligence", "Vision Lens", "Imaging Lab", "News Feed"])
     if st.button("Reset Session Memory"):
         st.session_state.messages = []
         st.rerun()
@@ -128,14 +141,11 @@ with st.sidebar:
 if module == "Research Hub":
     st.title("🏛️ Research Hub")
     if "messages" not in st.session_state: st.session_state.messages = []
-
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]): st.write(msg["content"])
-
     if prompt := st.chat_input("Enter inquiry..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.write(prompt)
-
         with st.chat_message("assistant"):
             with st.spinner("Accessing global archives..."):
                 search_results = tavily_client.search(query=prompt)
@@ -157,7 +167,7 @@ elif module == "PDF Intelligence":
                 ans = get_apollo_response(q, pdf_text[:6000])
                 st.info(ans)
 
-# --- VISION LENS (THE NEW FEATURE) ---
+# --- VISION LENS ---
 elif module == "Vision Lens":
     st.title("📸 Optical Intelligence")
     img = st.camera_input("Capture Intelligence")
@@ -168,6 +178,35 @@ elif module == "Vision Lens":
             with st.spinner("Apollo is analyzing visual patterns..."):
                 analysis = ask_apollo_vision(img, vision_query)
                 st.info(f"**Visual Analysis:** {analysis}")
+
+# --- IMAGING LAB (THE NEW CREATIVITY FEATURE) ---
+elif module == "Imaging Lab":
+    st.title("🎨 Imaging & Visualization Lab")
+    
+    st.write("Enter a prompt to visualize data or create schematic concepts.")
+    image_prompt = st.text_area("Visualization Prompt...", placeholder="A schematic diagram of a solar-powered water filtration system, JetBrains Mono font labels, technical drawing style...")
+    
+    if st.button("Generate Visualization"):
+        if image_prompt:
+            with st.spinner("Apollo is synthesizing visual matrices..."):
+                image_url = generate_apollo_image(image_prompt)
+                
+                if "Error" in image_url:
+                    st.error(image_url)
+                else:
+                    st.image(image_url, caption=f"Visualization: {image_prompt[:50]}...")
+                    
+                    # Add download button for the judges
+                    try:
+                        image_data = requests.get(image_url).content
+                        st.download_button(
+                            label="Download Visualization (PNG)",
+                            data=image_data,
+                            file_name=f"apollo_viz_{int(time.time())}.png",
+                            mime="image/png"
+                        )
+                    except:
+                        st.caption("Temporary download link generation failed.")
 
 # --- NEWS FEED ---
 elif module == "News Feed":
