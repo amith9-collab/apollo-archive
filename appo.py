@@ -32,36 +32,52 @@ st.set_page_config(page_title="Apollo OS", layout="wide")
 # ==========================================
 st.set_page_config(page_title="Apollo OS", layout="wide")
 
+# ==========================================
+# 2. EXECUTIVE UI & CSS (ICON REPLACEMENT)
+# ==========================================
+st.set_page_config(page_title="Apollo OS", layout="wide")
+
 st.markdown("""
     <style>
-    /* 1. Force Background & Global Font */
+    /* 1. Base Styles */
     .stApp { background-color: #020617 !important; }
     * { font-family: 'JetBrains Mono', monospace !important; }
     h1, h2, h3, p, span, div, label { color: #f8fafc !important; }
 
-    /* 2. THE UPLOAD FONT BRUTE-FORCE FIX */
-    /* Hides the 'ghost' labels causing the double-text overlap */
-    [data-testid="stFileUploader"] > section > label, 
-    [data-testid="stFileUploader"] label div { 
+    /* 2. THE NUCLEAR FIX: DELETE TEXT, ADD ICON */
+    /* Kill all existing text labels in the uploader area */
+    [data-testid="stFileUploader"] label, 
+    [data-testid="stFileUploader"] section > div, 
+    [data-testid="stFileUploader"] small { 
         display: none !important; 
-        visibility: hidden !important;
-        height: 0px !important;
     }
 
-    /* Style the actual visible button text */
+    /* Target the button text directly and make it invisible */
     [data-testid="stFileUploader"] button p {
+        font-size: 0px !important;
+        line-height: 0 !important;
+        display: block;
+    }
+
+    /* Inject the PDF/Document Icon into the button */
+    [data-testid="stFileUploader"] button p::before {
+        content: "📄 UPLOAD DATA";
+        font-size: 14px !important;
         color: #38bdf8 !important;
-        font-weight: bold !important;
+        visibility: visible !important;
+        display: block;
     }
 
-    /* Style the Browse Files button container */
+    /* Style the button container */
     button[kind="secondary"] {
-        background-color: #1e293b !important;
+        background-color: #0f172a !important;
         border: 1px solid #38bdf8 !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
+        padding: 5px 20px !important;
+        min-height: 45px !important;
     }
 
-    /* 3. Chat & UI Refinement */
+    /* 3. Refined Chat UI */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
@@ -69,9 +85,7 @@ st.markdown("""
         margin-bottom: 15px !important;
     }
     [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { display: none !important; }
-    
-    /* File Name text fix */
-    [data-testid="stFileUploaderFileName"] { color: #38bdf8 !important; }
+    [data-testid="stFileUploaderFileName"] { color: #38bdf8 !important; margin-top: 10px !important; }
     </style>
     """, unsafe_allow_html=True)
 # ==========================================
