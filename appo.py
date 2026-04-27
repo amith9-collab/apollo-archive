@@ -20,31 +20,62 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 # ==========================================
 # 2. EXECUTIVE UI & CSS
 # ==========================================
+# ==========================================
+# 2. EXECUTIVE UI & CSS (MOBILE RESPONSIVE)
+# ==========================================
 st.set_page_config(page_title="Apollo OS", layout="wide", page_icon="💠")
 
 st.markdown("""
     <style>
+    /* 1. Global Base Styles */
     .stApp { background-color: #020617 !important; }
     h1, h2, h3, p, span, div, label { 
         color: #f8fafc !important; 
         font-family: 'JetBrains Mono', monospace !important; 
     }
+
+    /* 2. Standard Desktop Fixes */
+    [data-testid="stFileUploader"] section > label { display: none !important; }
     button[kind="secondary"] {
         background-color: #1e293b !important;
         color: #38bdf8 !important;
         border: 1px solid #38bdf8 !important;
         border-radius: 6px !important;
     }
-    [data-testid="stFileUploaderDropzone"] {
-        border: 1px solid #334155 !important;
-        background-color: #0f172a !important;
-        border-radius: 10px !important;
+
+    /* 3. MOBILE-SPECIFIC FIXES (The "Phone View") */
+    @media (max-width: 768px) {
+        /* Fix the jumbled upload text */
+        [data-testid="stFileUploader"] {
+            overflow: hidden !important;
+        }
+        
+        /* Reduce font sizes so they don't overlap */
+        h1 { font-size: 1.5rem !important; }
+        h2 { font-size: 1.2rem !important; }
+        
+        /* Make the sidebar text smaller so it fits */
+        [data-testid="stSidebar"] {
+            width: 250px !important;
+        }
+        
+        /* Hide the 'drag and drop' text on mobile since you can't drag on a phone */
+        [data-testid="stFileUploaderDropzone"] div div span {
+            display: none !important;
+        }
+        
+        /* Force the 'Browse' button to be full width and centered */
+        [data-testid="stFileUploaderDropzone"] button {
+            width: 100% !important;
+            margin: 0 auto !important;
+        }
     }
+
+    /* 4. Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
         border-radius: 10px !important;
-        margin-bottom: 15px !important;
     }
     [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { 
         display: none !important; 
