@@ -1,65 +1,48 @@
 import streamlit as st
-import pandas as pd
-import random
-import time
+from groq import Groq
+from tavily import TavilyClient
 import PyPDF2
-
-# --- SAFETY CHECK: TRY IMPORTING GROQ ---
-try:
-    from groq import Groq
-    from tavily import TavilyClient
-except ImportError:
-    st.error("⚠️ SYSTEM ERROR: Missing Libraries. Please run 'pip install groq tavily-python' in your terminal.")
-    st.stop()
+import base64
+import time
 
 # ==========================================
-# 1. CORE AI ENGINES (KEYS)
+# 1. CORE AI ENGINES & API KEYS
 # ==========================================
 GROQ_API_KEY = "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"
 TAVILY_API_KEY = "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"
 
-# Initialize Clients
 groq_client = Groq(api_key=GROQ_API_KEY)
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
-
 # ==========================================
-# 2. EXECUTIVE UI & CSS (WING-IT VERSION)
+# 2. EXECUTIVE UI & CSS (STABLE VERSION)
 # ==========================================
-st.set_page_config(page_title="Apollo OS", layout="wide")
+st.set_page_config(page_title="Apollo OS", layout="wide", page_icon="💠")
 
 st.markdown("""
     <style>
-    /* 1. Base UI */
     .stApp { background-color: #020617 !important; }
     h1, h2, h3, p, span, div, label { 
         color: #f8fafc !important; 
         font-family: 'JetBrains Mono', monospace !important; 
     }
 
-    /* 2. THE BLUE BOX UPLOADER (ORIGINAL STYLE) */
-    /* Target the button container */
+    /* Professional Button Styling */
     button[kind="secondary"] {
         background-color: #1e293b !important;
         color: #38bdf8 !important;
         border: 1px solid #38bdf8 !important;
         border-radius: 6px !important;
-        padding: 0.5rem 1rem !important;
     }
 
-    /* The file uploader 'Dropzone' area */
+    /* Uploader Dropzone Fix */
     [data-testid="stFileUploaderDropzone"] {
         border: 1px solid #334155 !important;
         background-color: #0f172a !important;
         border-radius: 10px !important;
     }
 
-    /* Hide only the small helper text to reduce clutter */
-    [data-testid="stFileUploader"] small {
-        display: none !important;
-    }
-
-    /* 3. Professional Chat Styling */
+    /* Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
@@ -67,38 +50,59 @@ st.markdown("""
         margin-bottom: 15px !important;
     }
     
-    /* Remove Icons for the 'Clean OS' look */
     [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { 
         display: none !important; 
     }
-    
-    /* File Name text color */
-    [data-testid="stFileUploaderFileName"] { 
-        color: #38bdf8 !important; 
-    }
     </style>
     """, unsafe_allow_html=True)
+
 # ==========================================
-# 3. LOGIC CORE
+# 3. LOGIC HUB (THE BRAINS)
 # ==========================================
 
 def get_apollo_response(user_input, context=""):
-    """Apollo's Reasoning Engine powered by Groq Llama-3."""
+    """Text-based reasoning using Llama 3.1 Instant."""
     system_msg = "You are APOLLO, a high-level research OS. Use provided context to answer professionally."
     try:
-        chat_completion = groq_client.chat.completions.create(
+        completion = groq_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": f"Context: {context}\n\nQuestion: {user_input}"}
             ],
-            model="llama-3.1-8b-instant", # This is the specific 2026 model ID
+            model="llama-3.1-8b-instant",
         )
-        return chat_completion.choices[0].message.content
+        return completion.choices[0].message.content
     except Exception as e:
         return f"Neural link timeout. Error: {str(e)}"
 
+def encode_image(image_file):
+    """Converts camera image to Base64 for the AI to 'see'."""
+    return base64.b64encode(image_file.getvalue()).decode('utf-8')
+
+def ask_apollo_vision(image_file, user_query):
+    """Visual reasoning using Llama 3.2 Vision."""
+    base64_image = encode_image(image_file)
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama-3.2-11b-vision-preview",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": user_query},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                        },
+                    ],
+                }
+            ],
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Optical Analysis Error: {str(e)}"
+
 def read_pdf(file):
-    """Extracts text from PDF for the AI to read."""
     reader = PyPDF2.PdfReader(file)
     text = ""
     for page in reader.pages:
@@ -134,11 +138,8 @@ if module == "Research Hub":
 
         with st.chat_message("assistant"):
             with st.spinner("Accessing global archives..."):
-                # 1. Search the web with Tavily
                 search_results = tavily_client.search(query=prompt)
                 context = "\n".join([r['content'] for r in search_results['results']])
-                
-                # 2. Reason with Groq
                 response = get_apollo_response(prompt, context)
                 st.write(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
@@ -149,22 +150,24 @@ elif module == "PDF Intelligence":
     uploaded_file = st.file_uploader("Upload technical manual", type="pdf")
     if uploaded_file:
         pdf_text = read_pdf(uploaded_file)
-        st.success("Document analyzed successfully.")
+        st.success("Document analyzed.")
         q = st.text_input("Ask a question about this document:")
         if q:
-            with st.spinner("Apollo is reading the fine print..."):
-                ans = get_apollo_response(q, pdf_text[:5000]) # Give AI the first 5000 chars
+            with st.spinner("Apollo is reading..."):
+                ans = get_apollo_response(q, pdf_text[:6000])
                 st.info(ans)
 
-# --- VISION LENS ---
+# --- VISION LENS (THE NEW FEATURE) ---
 elif module == "Vision Lens":
-    st.title("📸 Vision Lens")
-    cam = st.camera_input("Scan environment")
-    if cam:
-        st.image(cam)
-        st.write("Visual pattern recognized. Searching hardware database for matching circuit components...")
-        time.sleep(1.5)
-        st.success("Match found: IoT Microcontroller (ESP32 Series). Recommended library: MicroPython.")
+    st.title("📸 Optical Intelligence")
+    img = st.camera_input("Capture Intelligence")
+    if img:
+        st.image(img, caption="Visual Record Captured.")
+        vision_query = st.text_input("Analyze this image for...")
+        if vision_query:
+            with st.spinner("Apollo is analyzing visual patterns..."):
+                analysis = ask_apollo_vision(img, vision_query)
+                st.info(f"**Visual Analysis:** {analysis}")
 
 # --- NEWS FEED ---
 elif module == "News Feed":
