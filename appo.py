@@ -21,27 +21,62 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 st.set_page_config(page_title="Apollo OS", layout="wide")
 
 st.markdown("""
+    # ==========================================
+# 3. ADVANCED UI CUSTOMIZATION (FIXED)
+# ==========================================
+st.markdown("""
     <style>
+    /* Main Background & Global Fonts */
     .stApp { background-color: #020617 !important; }
-    h1, h2, h3, p, span, div, label { color: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; }
+    h1, h2, h3, p, span, div, label, li { 
+        color: #f8fafc !important; 
+        font-family: 'JetBrains Mono', monospace !important; 
+    }
+
+    /* --- THE FILE UPLOADER FONT FIX (V3) --- */
+    /* Hide the 'ghost' labels that cause the overlapping text */
+    [data-testid="stFileUploader"] section > label {
+        display: none !important;
+    }
     
-    /* Professional Terminal Aesthetic */
+    /* Style the actual Browse Files button */
+    button[kind="secondary"] {
+        background-color: #1e293b !important;
+        color: #38bdf8 !important;
+        border: 1px solid #38bdf8 !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+    }
+
+    /* Target the instruction text ('Limit 200MB per file') */
+    [data-testid="stFileUploader"] small {
+        color: #94a3b8 !important;
+        font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    /* Dropzone Styling */
+    [data-testid="stFileUploaderDropzone"] {
+        border: 2px dashed #334155 !important;
+        background-color: #0f172a !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+    }
+
+    /* Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border: 1px solid #1e293b !important;
         border-left: 4px solid #38bdf8 !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
     }
     
-    /* File Uploader Font Fix */
-    [data-testid="stFileUploaderFileName"], [data-testid="stText"] { color: #94a3b8 !important; }
-    button[kind="secondary"] { background-color: #1e293b !important; color: #38bdf8 !important; border: 1px solid #38bdf8 !important; }
-
-    /* Hide Avatars */
-    [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { display: none !important; }
+    /* Hide Icons */
+    [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] {
+        display: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
-
+   
 # ==========================================
 # 3. LOGIC HUB
 # ==========================================
