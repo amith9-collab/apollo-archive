@@ -84,7 +84,7 @@ def ask_apollo_vision(image_file, user_query):
     base64_image = encode_image(image_file)
     try:
         response = groq_client.chat.completions.create(
-            model="llama-3.2-11b-vision-preview",
+            model="llama-3.2-11b-vision-pi",
             messages=[
                 {
                     "role": "user",
