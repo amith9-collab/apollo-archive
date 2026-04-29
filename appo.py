@@ -29,13 +29,20 @@ st.markdown("""
     <style>
     /* 1. Global Base Styles */
     .stApp { background-color: #020617 !important; }
-    h1, h2, h3, p, span, div, label { 
+    
+    /* Target specific Streamlit text elements without breaking icons */
+    .stMarkdown, .stText, label, p, h1, h2, h3 { 
         color: #f8fafc !important; 
         font-family: 'JetBrains Mono', monospace !important; 
     }
 
-    /* 2. Standard Desktop Fixes */
-    [data-testid="stFileUploader"] section > label { display: none !important; }
+    /* 2. File Uploader Fixes */
+    /* Remove 'Drag and drop' text which glitches on small screens */
+    [data-testid="stFileUploaderDropzoneInstruction"] {
+        display: none !important;
+    }
+    
+    /* Style the Browse Button */
     button[kind="secondary"] {
         background-color: #1e293b !important;
         color: #38bdf8 !important;
@@ -43,46 +50,49 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* 3. MOBILE-SPECIFIC FIXES (The "Phone View") */
+    /* 3. MOBILE-SPECIFIC FIXES */
     @media (max-width: 768px) {
-        /* Fix the jumbled upload text */
+        /* Fix overlapping container issues */
         [data-testid="stFileUploader"] {
-            overflow: hidden !important;
+            width: 100% !important;
         }
-        
-        /* Reduce font sizes so they don't overlap */
-        h1 { font-size: 1.5rem !important; }
-        h2 { font-size: 1.2rem !important; }
-        
-        /* Make the sidebar text smaller so it fits */
+
+        /* Prevent Sidebar from forcing layout shifts */
         [data-testid="stSidebar"] {
-            width: 250px !important;
+            min-width: unset !important;
+            width: 70vw !important;
         }
+
+        /* Responsive Headings */
+        h1 { font-size: 1.4rem !important; }
+        h2 { font-size: 1.1rem !important; }
         
-        /* Hide the 'drag and drop' text on mobile since you can't drag on a phone */
-        [data-testid="stFileUploaderDropzone"] div div span {
-            display: none !important;
-        }
-        
-        /* Force the 'Browse' button to be full width and centered */
+        /* Ensure the upload button is easy to tap */
         [data-testid="stFileUploaderDropzone"] button {
             width: 100% !important;
-            margin: 0 auto !important;
         }
     }
 
-    /* 4. Chat Styling */
+    /* 4. Fix "Keyboard Double Arrow" / Sidebar Toggle */
+    /* This ensures the toggle button remains visible and isn't colored over */
+    [data-testid="stSidebarCollapseIcon"], [data-basebutton="true"] {
+        color: #38bdf8 !important;
+    }
+
+    /* 5. Chat Styling */
     .stChatMessage { 
         background-color: #0f172a !important;
         border-left: 4px solid #38bdf8 !important;
-        border-radius: 10px !important;
+        margin-bottom: 10px !important;
     }
-    [data-testid="stChatMessageAvatarUser"], [data-testid="stChatMessageAvatarAssistant"] { 
+    
+    /* Hiding avatars cleanly */
+    [data-testid="stChatMessageAvatarUser"], 
+    [data-testid="stChatMessageAvatarAssistant"] { 
         display: none !important; 
     }
     </style>
     """, unsafe_allow_html=True)
-
 # ==========================================
 # 3. LOGIC HUB (THE BRAINS)
 # ==========================================
